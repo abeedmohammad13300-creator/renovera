@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renovera – Kommunikationssystem</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c8a45c;--gold-l:#f0d898;--gold-d:#9a7a38;
+  --dark:#0f1117;--dark-2:#1a1d27;--dark-3:#22263a;--dark-4:#2d3249;
+  --text:#e8eaf0;--text-2:#9aa0b8;--text-3:#5c6280;
+  --green:#4ade80;--green-d:#16a34a;--green-bg:rgba(74,222,128,.08);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,.08);
+  --red:#f87171;--red-bg:rgba(248,113,113,.08);
+  --orange:#fb923c;--orange-bg:rgba(251,146,60,.08);
+  --r:10px;--r-sm:6px;
+  --shadow:0 4px 24px rgba(0,0,0,.3);
+}
+html,body{height:100%;background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;overflow:hidden}
+
+/* ── SHELL ── */
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;background:var(--dark-2);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0;transition:width .3s}
+.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.logo-name{font-size:1.1rem;font-weight:700;color:var(--gold);letter-spacing:.04em}
+.logo-sub{font-size:.68rem;color:var(--text-3);margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
+.sidebar-section{padding:12px 10px 4px;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:1px 6px;border-radius:var(--r-sm);cursor:pointer;color:var(--text-2);font-size:.82rem;font-weight:400;transition:all .2s;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-item.active{background:rgba(200,164,92,.12);color:var(--gold);font-weight:500}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.nav-badge.gold{background:var(--gold);color:var(--dark)}
+.sidebar-footer{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.06)}
+.role-switcher{display:flex;flex-direction:column;gap:4px}
+.role-btn{padding:6px 10px;border-radius:var(--r-sm);font-size:.75rem;cursor:pointer;border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--text-2);text-align:left;transition:all .2s}
+.role-btn.active{border-color:var(--gold);background:rgba(200,164,92,.1);color:var(--gold);font-weight:500}
+.role-btn:hover:not(.active){background:rgba(255,255,255,.05);color:var(--text)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--dark)}
+
+/* ── TOPBAR ── */
+.topbar{height:54px;background:var(--dark-2);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
+.topbar-title{font-size:.95rem;font-weight:600;color:var(--text);flex:1}
+.topbar-search{background:var(--dark-3);border:1px solid rgba(255,255,255,.06);border-radius:var(--r-sm);padding:6px 12px;color:var(--text);font-size:.8rem;width:200px;outline:none;font-family:inherit}
+.topbar-search::placeholder{color:var(--text-3)}
+.topbar-btn{width:34px;height:34px;border-radius:var(--r-sm);background:var(--dark-3);border:1px solid rgba(255,255,255,.06);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-2);position:relative;transition:all .2s}
+.topbar-btn:hover{background:var(--dark-4);color:var(--text)}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--dark-2)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--gold-d);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--dark);cursor:pointer;flex-shrink:0}
+
+/* ── CONTENT AREA ── */
+.content{flex:1;overflow-y:auto;padding:20px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--dark-4);border-radius:2px}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--dark-2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:16px}
+.card-title{font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.card-title span{font-size:.68rem;color:var(--text-3);font-weight:400}
+
+/* ── GRID LAYOUTS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+
+/* ── STAT CARDS ── */
+.stat{background:var(--dark-2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px 16px}
+.stat-label{font-size:.68rem;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.stat-val{font-size:1.6rem;font-weight:700;color:var(--text);line-height:1}
+.stat-sub{font-size:.7rem;margin-top:4px;display:flex;align-items:center;gap:4px}
+.stat-up{color:var(--green)}
+.stat-dn{color:var(--red)}
+
+/* ── PROJECTS LIST ── */
+.proj-list{display:flex;flex-direction:column;gap:8px}
+.proj-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--dark-3);border-radius:var(--r-sm);cursor:pointer;transition:all .2s;border:1px solid transparent}
+.proj-row:hover{border-color:rgba(200,164,92,.2);background:var(--dark-4)}
+.proj-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-gold{background:var(--gold)}
+.dot-blue{background:var(--blue)}
+.dot-red{background:var(--red)}
+.proj-info{flex:1;min-width:0}
+.proj-name{font-size:.82rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-meta{font-size:.7rem;color:var(--text-3);margin-top:2px}
+.proj-progress{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.progress-bar{width:60px;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width .5s}
+.progress-fill.green{background:var(--green)}
+.progress-fill.gold{background:var(--gold)}
+.progress-fill.blue{background:var(--blue)}
+.proj-pct{font-size:.7rem;color:var(--text-3);min-width:28px;text-align:right}
+.tag{display:inline-flex;align-items:center;font-size:.64rem;font-weight:500;padding:2px 8px;border-radius:12px;letter-spacing:.04em}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-gold{background:rgba(200,164,92,.12);color:var(--gold)}
+.tag-blue{background:var(--blue-bg);color:var(--blue)}
+.tag-red{background:var(--red-bg);color:var(--red)}
+.tag-orange{background:var(--orange-bg);color:var(--orange)}
+
+/* ── CHAT ── */
+.chat-wrap{display:flex;height:calc(100vh - 140px);gap:14px}
+.chat-list{width:240px;flex-shrink:0;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
+.chat-contact{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-sm);cursor:pointer;border:1px solid transparent;transition:all .2s}
+.chat-contact:hover{background:var(--dark-3)}
+.chat-contact.active{background:var(--dark-3);border-color:rgba(200,164,92,.2)}
+.chat-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.chat-info{flex:1;min-width:0}
+.chat-name{font-size:.8rem;font-weight:500;color:var(--text)}
+.chat-preview{font-size:.7rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.chat-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.chat-time{font-size:.62rem;color:var(--text-3)}
+.unread-badge{width:16px;height:16px;border-radius:50%;background:var(--gold);color:var(--dark);font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.chat-window{flex:1;background:var(--dark-2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);display:flex;flex-direction:column;overflow:hidden}
+.chat-header{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.chat-header-name{font-size:.85rem;font-weight:600;color:var(--text)}
+.chat-header-sub{font-size:.7rem;color:var(--text-3)}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--dark-4)}
+.msg{display:flex;flex-direction:column;max-width:65%}
+.msg.own{align-self:flex-end;align-items:flex-end}
+.msg.other{align-self:flex-start;align-items:flex-start}
+.msg-bubble{padding:8px 12px;border-radius:12px;font-size:.8rem;line-height:1.5;color:var(--text)}
+.msg.own .msg-bubble{background:rgba(200,164,92,.18);border-radius:12px 12px 2px 12px}
+.msg.other .msg-bubble{background:var(--dark-3);border-radius:12px 12px 12px 2px}
+.msg-time{font-size:.62rem;color:var(--text-3);margin-top:3px;padding:0 4px}
+.msg-system{align-self:center;font-size:.68rem;color:var(--text-3);background:var(--dark-3);padding:4px 12px;border-radius:12px}
+.msg-photo{width:160px;height:100px;border-radius:8px;object-fit:cover;background:var(--dark-4);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--text-3);border:1px dashed rgba(255,255,255,.1)}
+.chat-input-area{padding:12px 14px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:8px;align-items:flex-end}
+.chat-input{flex:1;background:var(--dark-3);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-sm);padding:8px 12px;color:var(--text);font-size:.82rem;outline:none;resize:none;font-family:inherit;line-height:1.4;min-height:36px;max-height:100px}
+.chat-input::placeholder{color:var(--text-3)}
+.send-btn{width:36px;height:36px;border-radius:var(--r-sm);background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--dark);transition:all .2s}
+.send-btn:hover{background:var(--gold-l)}
+.attach-btn{width:36px;height:36px;border-radius:var(--r-sm);background:var(--dark-3);border:1px solid rgba(255,255,255,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:all .2s}
+.attach-btn:hover{background:var(--dark-4);color:var(--text)}
+
+/* ── TASKS ── */
+.task-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.task-col{background:var(--dark-2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px}
+.task-col-title{font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.task-count{background:var(--dark-3);color:var(--text-2);font-size:.65rem;padding:1px 7px;border-radius:10px}
+.task-card{background:var(--dark-3);border-radius:var(--r-sm);padding:11px 12px;cursor:pointer;border:1px solid transparent;transition:all .2s}
+.task-card:hover{border-color:rgba(200,164,92,.2);background:var(--dark-4)}
+.task-title{font-size:.8rem;font-weight:500;color:var(--text);margin-bottom:5px;line-height:1.35}
+.task-proj{font-size:.68rem;color:var(--text-3)}
+.task-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.task-assignee{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text-3)}
+.mini-avatar{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:var(--dark)}
+.task-due{font-size:.65rem;padding:2px 6px;border-radius:4px}
+.due-ok{background:var(--green-bg);color:var(--green)}
+.due-warn{background:var(--orange-bg);color:var(--orange)}
+.due-late{background:var(--red-bg);color:var(--red)}
+
+/* ── NOTIFICATIONS ── */
+.notif-list{display:flex;flex-direction:column;gap:6px}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--dark-3);border-radius:var(--r-sm);border-left:3px solid transparent;transition:all .2s;cursor:pointer}
+.notif-item:hover{background:var(--dark-4)}
+.notif-item.unread{border-left-color:var(--gold)}
+.notif-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:.8rem;font-weight:500;color:var(--text)}
+.notif-sub{font-size:.71rem;color:var(--text-3);margin-top:2px;line-height:1.4}
+.notif-time{font-size:.65rem;color:var(--text-3);flex-shrink:0}
+
+/* ── CUSTOMER PORTAL ── */
+.portal-header{background:linear-gradient(135deg,var(--dark-2) 0%,var(--dark-3) 100%);border:1px solid rgba(200,164,92,.15);border-radius:var(--r);padding:20px 24px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.portal-greeting{font-size:1.1rem;font-weight:600;color:var(--text)}
+.portal-greeting span{color:var(--gold)}
+.portal-sub{font-size:.78rem;color:var(--text-3);margin-top:3px}
+.timeline-list{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:14px;padding-bottom:16px;position:relative}
+.tl-item:last-child{padding-bottom:0}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:15px;top:32px;bottom:0;width:2px;background:rgba(255,255,255,.06)}
+.tl-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;position:relative;z-index:1}
+.tl-done{background:var(--green-bg);border:2px solid var(--green)}
+.tl-current{background:rgba(200,164,92,.12);border:2px solid var(--gold)}
+.tl-pending{background:var(--dark-3);border:2px solid rgba(255,255,255,.1)}
+.tl-body{flex:1;padding-top:4px}
+.tl-title{font-size:.82rem;font-weight:500;color:var(--text)}
+.tl-desc{font-size:.72rem;color:var(--text-3);margin-top:2px}
+.tl-date{font-size:.68rem;color:var(--text-3);margin-top:3px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-sm);font-size:.78rem;font-weight:500;cursor:pointer;border:none;transition:all .2s;font-family:inherit}
+.btn-gold{background:var(--gold);color:var(--dark)}
+.btn-gold:hover{background:var(--gold-l)}
+.btn-ghost{background:transparent;color:var(--text-2);border:1px solid rgba(255,255,255,.1)}
+.btn-ghost:hover{background:var(--dark-3);color:var(--text)}
+.btn-sm{padding:4px 10px;font-size:.72rem}
+
+/* ── EMPLOYEE VIEW ── */
+.emp-today{background:linear-gradient(135deg,rgba(200,164,92,.15),rgba(200,164,92,.05));border:1px solid rgba(200,164,92,.2);border-radius:var(--r);padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.emp-greeting{font-size:1rem;font-weight:600;color:var(--text)}
+.emp-greeting small{display:block;font-size:.72rem;color:var(--text-3);font-weight:400;margin-top:2px}
+.clock{font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:.06em}
+.emp-task{background:var(--dark-3);border-radius:var(--r-sm);padding:12px 14px;border-left:3px solid var(--gold);margin-bottom:8px;cursor:pointer;transition:all .2s}
+.emp-task:hover{background:var(--dark-4)}
+.emp-task-title{font-size:.82rem;font-weight:500;color:var(--text)}
+.emp-task-loc{font-size:.7rem;color:var(--text-3);margin-top:2px;display:flex;align-items:center;gap:4px}
+.emp-task-status{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.photo-upload{background:var(--dark-3);border:2px dashed rgba(200,164,92,.2);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .2s}
+.photo-upload:hover{border-color:var(--gold);background:rgba(200,164,92,.04)}
+.photo-upload-icon{font-size:1.8rem;margin-bottom:6px}
+.photo-upload-text{font-size:.78rem;color:var(--text-2)}
+.photo-upload-sub{font-size:.68rem;color:var(--text-3);margin-top:2px}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.photo-thumb{aspect-ratio:1;background:var(--dark-3);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;border:1px solid rgba(255,255,255,.06)}
+
+/* HIDDEN */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-name">Renovera</div>
+      <div class="logo-sub">Kommunikationssystem</div>
+    </div>
+
+    <div class="sidebar-section">Navigation</div>
+    <div class="nav-item active" onclick="showPanel('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showPanel('chat',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Nachrichten
+      <div class="nav-badge">5</div>
+    </div>
+    <div class="nav-item" onclick="showPanel('tasks',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Aufgaben
+      <div class="nav-badge gold">3</div>
+    </div>
+    <div class="nav-item" onclick="showPanel('projekte',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Projekte
+    </div>
+    <div class="nav-item" onclick="showPanel('notifs',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Benachrichtigungen
+      <div class="nav-badge">2</div>
+    </div>
+
+    <div class="sidebar-section" style="margin-top:8px">Ansicht</div>
+    <div class="sidebar-footer">
+      <div style="font-size:.65rem;color:var(--text-3);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase">Rolle wechseln</div>
+      <div class="role-switcher">
+        <button class="role-btn" onclick="switchRole('kunde',this)">🏠 Kunde</button>
+        <button class="role-btn active" onclick="switchRole('buero',this)">🏢 Büro / Chef</button>
+        <button class="role-btn" onclick="switchRole('mitarbeiter',this)">👷 Mitarbeiter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard – Büro</div>
+      <input class="topbar-search" placeholder="Suchen...">
+      <div class="topbar-btn" onclick="showPanel('notifs',document.querySelector('.nav-item:nth-child(6)'))">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="avatar" id="userAvatar">KY</div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD (BÜRO) ── -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="g4">
+          <div class="stat">
+            <div class="stat-label">Aktive Projekte</div>
+            <div class="stat-val">12</div>
+            <div class="stat-sub stat-up">↑ 3 diese Woche</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Offene Aufgaben</div>
+            <div class="stat-val">28</div>
+            <div class="stat-sub stat-dn">↓ 5 heute erledigt</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Neue Nachrichten</div>
+            <div class="stat-val">5</div>
+            <div class="stat-sub" style="color:var(--text-3)">von 3 Kunden</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Mitarbeiter aktiv</div>
+            <div class="stat-val">6 / 8</div>
+            <div class="stat-sub stat-up">↑ 2 auf Baustelle</div>
+          </div>
+        </div>
+
+        <div class="g2">
+          <div class="card">
+            <div class="card-title">Aktuelle Projekte <span>Heute · 12 gesamt</span></div>
+            <div class="proj-list">
+              <div class="proj-row">
+                <div class="proj-dot dot-green"></div>
+                <div class="proj-info"><div class="proj-name">MFH Elberfeld – Komplettsanierung</div><div class="proj-meta">Stefan H. · Barmen · noch 8 Tage</div></div>
+                <div class="proj-progress"><div class="progress-bar"><div class="progress-fill green" style="width:85%"></div></div><div class="proj-pct">85%</div></div>
+              </div>
+              <div class="proj-row">
+                <div class="proj-dot dot-gold"></div>
+                <div class="proj-info"><div class="proj-name">Bürogebäude Barmen – Trockenbau</div><div class="proj-meta">Marco B. · Barmen · noch 3 Wochen</div></div>
+                <div class="proj-progress"><div class="progress-bar"><div class="progress-fill gold" style="width:65%"></div></div><div class="proj-pct">65%</div></div>
+              </div>
+              <div class="proj-row">
+                <div class="proj-dot dot-blue"></div>
+                <div class="proj-info"><div class="proj-name">Badsanierung Familie Müller</div><div class="proj-meta">Ahmed K. · Ronsdorf · noch 5 Tage</div></div>
+                <div class="proj-progress"><div class="progress-bar"><div class="progress-fill blue" style="width:40%"></div></div><div class="proj-pct">40%</div></div>
+              </div>
+              <div class="proj-row">
+                <div class="proj-dot dot-red"></div>
+                <div class="proj-info"><div class="proj-name">Wohnung Cronenberg – Verzug!</div><div class="proj-meta">Klaus M. · Cronenberg · 2 Tage überfällig</div></div>
+                <div class="proj-progress"><div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--red)"></div></div><div class="proj-pct">30%</div></div>
+              </div>
+              <div class="proj-row">
+                <div class="proj-dot dot-green"></div>
+                <div class="proj-info"><div class="proj-name">Parkett Solingen Innenstadt</div><div class="proj-meta">Stefan H. · Solingen · morgen fertig</div></div>
+                <div class="proj-progress"><div class="progress-bar"><div class="progress-fill green" style="width:95%"></div></div><div class="proj-pct">95%</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Letzte Nachrichten <span onclick="showPanel('chat',document.querySelectorAll('.nav-item')[1])" style="cursor:pointer;color:var(--gold)">Alle →</span></div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="proj-row" onclick="showPanel('chat',document.querySelectorAll('.nav-item')[1])">
+                <div class="chat-avatar" style="background:rgba(96,165,250,.2);color:var(--blue);width:36px;height:36px;font-size:.72rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">SK</div>
+                <div class="proj-info"><div class="proj-name">Sandra K. – Wohnung Elberfeld</div><div class="proj-meta" style="color:var(--text-2)">"Wann kommen die Malerarbeiten?"</div></div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div style="font-size:.63rem;color:var(--text-3)">14:32</div><div class="unread-badge">2</div></div>
+              </div>
+              <div class="proj-row" onclick="showPanel('chat',document.querySelectorAll('.nav-item')[1])">
+                <div class="chat-avatar" style="background:rgba(74,222,128,.12);color:var(--green);width:36px;height:36px;font-size:.72rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">SH</div>
+                <div class="proj-info"><div class="proj-name">Stefan H. – Bauleiter</div><div class="proj-meta" style="color:var(--text-2)">"Fotos Wohnung Elberfeld hochgeladen"</div></div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div style="font-size:.63rem;color:var(--text-3)">13:15</div></div>
+              </div>
+              <div class="proj-row" onclick="showPanel('chat',document.querySelectorAll('.nav-item')[1])">
+                <div class="chat-avatar" style="background:rgba(251,146,60,.12);color:var(--orange);width:36px;height:36px;font-size:.72rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">TM</div>
+                <div class="proj-info"><div class="proj-name">Thomas M. – Büroprojekt</div><div class="proj-meta" style="color:var(--text-2)">"Können wir Termin verschieben?"</div></div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div style="font-size:.63rem;color:var(--text-3)">11:00</div><div class="unread-badge">1</div></div>
+              </div>
+              <div class="proj-row" onclick="showPanel('chat',document.querySelectorAll('.nav-item')[1])">
+                <div class="chat-avatar" style="background:rgba(200,164,92,.12);color:var(--gold);width:36px;height:36px;font-size:.72rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">MK</div>
+                <div class="proj-info"><div class="proj-name">Marco B. – Elektriker</div><div class="proj-meta" style="color:var(--text-2)">"Material für morgen bestellt ✓"</div></div>
+                <div style="font-size:.63rem;color:var(--text-3)">09:40</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Team-Übersicht · Heute <span>Mo 02.06.2025</span></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+            <div style="background:var(--dark-3);border-radius:var(--r-sm);padding:12px;text-align:center">
+              <div style="width:40px;height:40px;border-radius:50%;background:rgba(74,222,128,.15);border:2px solid var(--green);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:var(--green)">SH</div>
+              <div style="font-size:.78rem;font-weight:500;color:var(--text)">Stefan H.</div>
+              <div style="font-size:.65rem;color:var(--text-3);margin-top:2px">Elberfeld · aktiv</div>
+              <div class="tag tag-green" style="margin-top:6px">● Online</div>
+            </div>
+            <div style="background:var(--dark-3);border-radius:var(--r-sm);padding:12px;text-align:center">
+              <div style="width:40px;height:40px;border-radius:50%;background:rgba(96,165,250,.15);border:2px solid var(--blue);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:var(--blue)">MB</div>
+              <div style="font-size:.78rem;font-weight:500;color:var(--text)">Marco B.</div>
+              <div style="font-size:.65rem;color:var(--text-3);margin-top:2px">Barmen · aktiv</div>
+              <div class="tag tag-blue" style="margin-top:6px">● Baustelle</div>
+            </div>
+            <div style="background:var(--dark-3);border-radius:var(--r-sm);padding:12px;text-align:center">
+              <div style="width:40px;height:40px;border-radius:50%;background:rgba(200,164,92,.15);border:2px solid var(--gold);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:var(--gold)">AK</div>
+              <div style="font-size:.78rem;font-weight:500;color:var(--text)">Ahmed K.</div>
+              <div style="font-size:.65rem;color:var(--text-3);margin-top:2px">Ronsdorf · aktiv</div>
+              <div class="tag tag-gold" style="margin-top:6px">● Unterwegs</div>
+            </div>
+            <div style="background:var(--dark-3);border-radius:var(--r-sm);padding:12px;text-align:center">
+              <div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:var(--text-3)">KM</div>
+              <div style="font-size:.78rem;font-weight:500;color:var(--text)">Klaus M.</div>
+              <div style="font-size:.65rem;color:var(--text-3);margin-top:2px">Frei · heute</div>
+              <div class="tag" style="background:rgba(255,255,255,.05);color:var(--text-3);margin-top:6px">○ Offline</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CHAT ── -->
+      <div class="panel" id="panel-chat">
+        <div class="chat-wrap">
+          <div class="chat-list">
+            <div style="font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:4px 6px;margin-bottom:4px">Kunden</div>
+            <div class="chat-contact active" onclick="openChat('Sandra K.','SK','blue','Elberfeld Wohnung',true)">
+              <div class="chat-avatar" style="background:rgba(96,165,250,.15);color:var(--blue)">SK</div>
+              <div class="chat-info"><div class="chat-name">Sandra K.</div><div class="chat-preview">Wann kommen die Malerarbeiten?</div></div>
+              <div class="chat-meta"><div class="chat-time">14:32</div><div class="unread-badge">2</div></div>
+            </div>
+            <div class="chat-contact" onclick="openChat('Thomas M.','TM','orange','Büroprojekt Barmen',true)">
+              <div class="chat-avatar" style="background:rgba(251,146,60,.15);color:var(--orange)">TM</div>
+              <div class="chat-info"><div class="chat-name">Thomas M.</div><div class="chat-preview">Können wir Termin verschieben?</div></div>
+              <div class="chat-meta"><div class="chat-time">11:00</div><div class="unread-badge">1</div></div>
+            </div>
+            <div class="chat-contact" onclick="openChat('Familie Müller','FM','green','Badsanierung Ronsdorf',false)">
+              <div class="chat-avatar" style="background:rgba(74,222,128,.15);color:var(--green)">FM</div>
+              <div class="chat-info"><div class="chat-name">Familie Müller</div><div class="chat-preview">Vielen Dank für die schnelle Arbeit!</div></div>
+              <div class="chat-meta"><div class="chat-time">Gestern</div></div>
+            </div>
+            <div style="font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:8px 6px 4px;margin-top:4px;border-top:1px solid rgba(255,255,255,.06)">Team</div>
+            <div class="chat-contact" onclick="openChat('Stefan H.','SH','green','Bauleiter',true)">
+              <div class="chat-avatar" style="background:rgba(74,222,128,.15);color:var(--green)">SH</div>
+              <div class="chat-info"><div class="chat-name">Stefan H.</div><div class="chat-preview">Fotos hochgeladen ✓</div></div>
+              <div class="chat-meta"><div class="chat-time">13:15</div></div>
+            </div>
+            <div class="chat-contact" onclick="openChat('Marco B.','MB','blue','Elektriker',true)">
+              <div class="chat-avatar" style="background:rgba(96,165,250,.15);color:var(--blue)">MB</div>
+              <div class="chat-info"><div class="chat-name">Marco B.</div><div class="chat-preview">Material für morgen bestellt ✓</div></div>
+              <div class="chat-meta"><div class="chat-time">09:40</div></div>
+            </div>
+            <div class="chat-contact" onclick="openChat('Ahmed K.','AK','gold','Fliesenleger',false)">
+              <div class="chat-avatar" style="background:rgba(200,164,92,.15);color:var(--gold)">AK</div>
+              <div class="chat-info"><div class="chat-name">Ahmed K.</div><div class="chat-preview">Bin um 8 auf Baustelle</div></div>
+              <div class="chat-meta"><div class="chat-time">08:00</div></div>
+            </div>
+          </div>
+
+          <div class="chat-window">
+            <div class="chat-header">
+              <div class="chat-avatar" id="cAvatar" style="background:rgba(96,165,250,.15);color:var(--blue);width:36px;height:36px;font-size:.72rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">SK</div>
+              <div class="online-dot" id="cOnline"></div>
+              <div><div class="chat-header-name" id="cName">Sandra K.</div><div class="chat-header-sub" id="cSub">Elberfeld Wohnung · Online</div></div>
+              <div style="margin-left:auto;display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm">📋 Projekt</button>
+                <button class="btn btn-ghost btn-sm">📞 Anrufen</button>
+              </div>
+            </div>
+            <div class="messages" id="messages">
+              <div class="msg-system">Heute, 14:20</div>
+              <div class="msg other"><div class="msg-bubble">Guten Tag! Ich wollte mal nachfragen, wie der Stand bei den Malerarbeiten ist?</div><div class="msg-time">14:20</div></div>
+              <div class="msg own"><div class="msg-bubble">Hallo Frau K., die Malerarbeiten starten übermorgen Mittwoch um 8:00 Uhr. Stefan und sein Team werden pünktlich da sein.</div><div class="msg-time">14:25</div></div>
+              <div class="msg other"><div class="msg-bubble">Super, danke für die Info! Muss ich etwas vorbereiten oder aus dem Zimmer räumen?</div><div class="msg-time">14:28</div></div>
+              <div class="msg own"><div class="msg-bubble">Bitte die Möbel in der Mitte des Raums zusammenstellen, wir bringen Schutzfolien mit. Den Rest übernehmen wir! 👍</div><div class="msg-time">14:30</div></div>
+              <div class="msg other"><div class="msg-bubble">Wann kommen die Malerarbeiten genau? Morgen oder Mittwoch?</div><div class="msg-time">14:32</div></div>
+            </div>
+            <div class="chat-input-area">
+              <button class="attach-btn" title="Foto/Datei">📎</button>
+              <textarea class="chat-input" id="msgInput" rows="1" placeholder="Nachricht schreiben..." onkeydown="sendMsg(event)"></textarea>
+              <button class="send-btn" onclick="sendMsg({key:'Enter',preventDefault:()=>{}})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AUFGABEN ── -->
+      <div class="panel" id="panel-tasks">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:.9rem;font-weight:600;color:var(--text)">Aufgaben-Board</div>
+          <button class="btn btn-gold btn-sm">+ Neue Aufgabe</button>
+        </div>
+        <div class="task-board">
+          <div class="task-col">
+            <div class="task-col-title" style="color:var(--text-3)">📋 Offen <div class="task-count">5</div></div>
+            <div class="task-card"><div class="task-title">Fliesenauswahl mit Kunde absprechen</div><div class="task-proj">🏠 Badsanierung Ronsdorf</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(200,164,92,.3);color:var(--gold)">AK</div>Ahmed K.</div><div class="task-due due-warn">Di 03.06</div></div></div>
+            <div class="task-card"><div class="task-title">Material Parkett bestellen – 45m²</div><div class="task-proj">🏢 Solingen Innenstadt</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(74,222,128,.2);color:var(--green)">SH</div>Stefan H.</div><div class="task-due due-ok">Mi 04.06</div></div></div>
+            <div class="task-card"><div class="task-title">Angebot Hausverwaltung Kübarth senden</div><div class="task-proj">📄 Büro – Karim</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(200,164,92,.3);color:var(--gold)">KY</div>Karim Y.</div><div class="task-due due-warn">Mo 02.06</div></div></div>
+            <div class="task-card"><div class="task-title">Fotos Abnahme Wohnung Elberfeld</div><div class="task-proj">🏠 MFH Elberfeld</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(74,222,128,.2);color:var(--green)">SH</div>Stefan H.</div><div class="task-due due-late">Fr 30.05</div></div></div>
+            <div class="task-card"><div class="task-title">Rechnung Büroprojekt ausstellen</div><div class="task-proj">🏢 Bürogebäude Barmen</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(200,164,92,.3);color:var(--gold)">KY</div>Karim Y.</div><div class="task-due due-ok">Fr 06.06</div></div></div>
+          </div>
+          <div class="task-col">
+            <div class="task-col-title" style="color:var(--gold)">⚙️ In Arbeit <div class="task-count">4</div></div>
+            <div class="task-card" style="border-color:rgba(200,164,92,.2)"><div class="task-title">Trockenbau Etage 2 – Platten setzen</div><div class="task-proj">🏢 Bürogebäude Barmen</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(96,165,250,.2);color:var(--blue)">MB</div>Marco B.</div><div class="task-due due-ok">Heute</div></div></div>
+            <div class="task-card" style="border-color:rgba(200,164,92,.2)"><div class="task-title">Wandfliesen Bad verlegen – OG</div><div class="task-proj">🏠 Badsanierung Ronsdorf</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(200,164,92,.3);color:var(--gold)">AK</div>Ahmed K.</div><div class="task-due due-ok">Heute</div></div></div>
+            <div class="task-card" style="border-color:rgba(200,164,92,.2)"><div class="task-title">Abschlussreinigung Solingen</div><div class="task-proj">🏠 Solingen Innenstadt</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(74,222,128,.2);color:var(--green)">SH</div>Stefan H.</div><div class="task-due due-ok">Morgen</div></div></div>
+            <div class="task-card" style="border-color:rgba(200,164,92,.2)"><div class="task-title">Elektroleitungen Etage 1 verlegen</div><div class="task-proj">🏢 Bürogebäude Barmen</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(96,165,250,.2);color:var(--blue)">MB</div>Marco B.</div><div class="task-due due-warn">Di 03.06</div></div></div>
+          </div>
+          <div class="task-col">
+            <div class="task-col-title" style="color:var(--green)">✅ Erledigt <div class="task-count">8</div></div>
+            <div class="task-card" style="opacity:.6"><div class="task-title" style="text-decoration:line-through">Bodenfliesen Bad verlegen – EG</div><div class="task-proj">🏠 Badsanierung Ronsdorf</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(200,164,92,.3);color:var(--gold)">AK</div>Ahmed K.</div><div class="tag tag-green">Erledigt</div></div></div>
+            <div class="task-card" style="opacity:.6"><div class="task-title" style="text-decoration:line-through">Wände spachteln Elberfeld EG</div><div class="task-proj">🏠 MFH Elberfeld</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(74,222,128,.2);color:var(--green)">SH</div>Stefan H.</div><div class="tag tag-green">Erledigt</div></div></div>
+            <div class="task-card" style="opacity:.6"><div class="task-title" style="text-decoration:line-through">Angebot Nähr Immobilien gesendet</div><div class="task-proj">📄 Büro</div><div class="task-footer"><div class="task-assignee"><div class="mini-avatar" style="background:rgba(200,164,92,.3);color:var(--gold)">KY</div>Karim Y.</div><div class="tag tag-green">Erledigt</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROJEKTE ── -->
+      <div class="panel" id="panel-projekte">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:.9rem;font-weight:600;color:var(--text)">Alle Projekte</div>
+          <div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm">Filter</button><button class="btn btn-gold btn-sm">+ Neues Projekt</button></div>
+        </div>
+        <div class="card">
+          <div class="proj-list">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:8px;padding:6px 14px;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:4px">
+              <div>Projekt</div><div>Kunde</div><div>Mitarbeiter</div><div>Status</div><div>Fortschritt</div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:8px;align-items:center;padding:10px 14px;background:var(--dark-3);border-radius:var(--r-sm);cursor:pointer">
+              <div><div style="font-size:.82rem;font-weight:500;color:var(--text)">MFH Elberfeld – Komplettsanierung</div><div style="font-size:.68rem;color:var(--text-3)">120 m² · gestartet 15.04.2025</div></div>
+              <div style="font-size:.78rem;color:var(--text)">Familie K.</div>
+              <div style="font-size:.78rem;color:var(--text)">Stefan H.</div>
+              <div><div class="tag tag-green">Laufend</div></div>
+              <div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="flex:1"><div class="progress-fill green" style="width:85%"></div></div><div style="font-size:.7rem;color:var(--text-3)">85%</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:8px;align-items:center;padding:10px 14px;border-radius:var(--r-sm);cursor:pointer">
+              <div><div style="font-size:.82rem;font-weight:500;color:var(--text)">Bürogebäude Barmen – Trockenbau</div><div style="font-size:.68rem;color:var(--text-3)">800 m² · gestartet 01.05.2025</div></div>
+              <div style="font-size:.78rem;color:var(--text)">Thomas M.</div>
+              <div style="font-size:.78rem;color:var(--text)">Marco B.</div>
+              <div><div class="tag tag-gold">Laufend</div></div>
+              <div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="flex:1"><div class="progress-fill gold" style="width:65%"></div></div><div style="font-size:.7rem;color:var(--text-3)">65%</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:8px;align-items:center;padding:10px 14px;background:var(--dark-3);border-radius:var(--r-sm);cursor:pointer">
+              <div><div style="font-size:.82rem;font-weight:500;color:var(--text)">Badsanierung Ronsdorf</div><div style="font-size:.68rem;color:var(--text-3)">14 m² · gestartet 26.05.2025</div></div>
+              <div style="font-size:.78rem;color:var(--text)">Familie Müller</div>
+              <div style="font-size:.78rem;color:var(--text)">Ahmed K.</div>
+              <div><div class="tag tag-blue">Laufend</div></div>
+              <div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="flex:1"><div class="progress-fill blue" style="width:40%"></div></div><div style="font-size:.7rem;color:var(--text-3)">40%</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:8px;align-items:center;padding:10px 14px;border-radius:var(--r-sm);cursor:pointer">
+              <div><div style="font-size:.82rem;font-weight:500;color:var(--red)">⚠ Wohnung Cronenberg – Verzug!</div><div style="font-size:.68rem;color:var(--text-3)">85 m² · gestartet 10.05.2025</div></div>
+              <div style="font-size:.78rem;color:var(--text)">Ben S.</div>
+              <div style="font-size:.78rem;color:var(--text)">Klaus M.</div>
+              <div><div class="tag tag-red">Verzug</div></div>
+              <div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:30%;background:var(--red)"></div></div><div style="font-size:.7rem;color:var(--text-3)">30%</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:8px;align-items:center;padding:10px 14px;background:var(--dark-3);border-radius:var(--r-sm);cursor:pointer">
+              <div><div style="font-size:.82rem;font-weight:500;color:var(--text)">Parkett Solingen Innenstadt</div><div style="font-size:.68rem;color:var(--text-3)">60 m² · gestartet 28.05.2025</div></div>
+              <div style="font-size:.78rem;color:var(--text)">Herr Fischer</div>
+              <div style="font-size:.78rem;color:var(--text)">Stefan H.</div>
+              <div><div class="tag tag-green">Fast fertig</div></div>
+              <div style="display:flex;align-items:center;gap:6px"><div class="progress-bar" style="flex:1"><div class="progress-fill green" style="width:95%"></div></div><div style="font-size:.7rem;color:var(--text-3)">95%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NOTIFICATIONS ── -->
+      <div class="panel" id="panel-notifs">
+        <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:14px">Benachrichtigungen</div>
+        <div class="notif-list">
+          <div class="notif-item unread"><div class="notif-icon" style="background:var(--red-bg)">⚠️</div><div class="notif-body"><div class="notif-title">Projekt in Verzug: Wohnung Cronenberg</div><div class="notif-sub">Das Projekt ist 2 Tage überfällig. Klaus M. hat zuletzt vor 18 Stunden etwas gemeldet. Bitte kontaktieren.</div></div><div class="notif-time">Jetzt</div></div>
+          <div class="notif-item unread"><div class="notif-icon" style="background:var(--blue-bg)">💬</div><div class="notif-body"><div class="notif-title">Neue Nachricht von Thomas M.</div><div class="notif-sub">"Können wir den Termin am Donnerstag auf 14:00 Uhr verschieben?" – Büroprojekt Barmen</div></div><div class="notif-time">11:00</div></div>
+          <div class="notif-item"><div class="notif-icon" style="background:var(--green-bg)">📸</div><div class="notif-body"><div class="notif-title">Stefan H. hat 8 Fotos hochgeladen</div><div class="notif-sub">Projekt: MFH Elberfeld – Fortschrittsfotos Etage 2 · Malerarbeiten fast fertig</div></div><div class="notif-time">13:15</div></div>
+          <div class="notif-item"><div class="notif-icon" style="background:rgba(200,164,92,.1)">✅</div><div class="notif-body"><div class="notif-title">Aufgabe erledigt: Bodenfliesen Bad EG</div><div class="notif-sub">Ahmed K. hat die Aufgabe als erledigt markiert – Badsanierung Ronsdorf</div></div><div class="notif-time">10:30</div></div>
+          <div class="notif-item"><div class="notif-icon" style="background:var(--blue-bg)">💬</div><div class="notif-body"><div class="notif-title">Sandra K. hat geantwortet</div><div class="notif-sub">"Wann kommen die Malerarbeiten genau? Morgen oder Mittwoch?" – Elberfeld Wohnung</div></div><div class="notif-time">14:32</div></div>
+          <div class="notif-item"><div class="notif-icon" style="background:var(--green-bg)">📦</div><div class="notif-body"><div class="notif-title">Material bestellt: Marco B.</div><div class="notif-sub">Kabeltrommeln und Dosen für morgen bestellt. Lieferung 07:00 Uhr Baustelle Barmen.</div></div><div class="notif-time">09:40</div></div>
+        </div>
+      </div>
+
+      <!-- ── CUSTOMER PORTAL ── -->
+      <div class="panel" id="panel-kunde">
+        <div class="portal-header">
+          <div><div class="portal-greeting">Guten Tag, <span>Sandra K.!</span></div><div class="portal-sub">Ihr Projekt: Wohnungssanierung Elberfeld · Projektnummer: REN-2025-047</div></div>
+          <div style="text-align:right"><div style="font-size:1.8rem;font-weight:700;color:var(--gold)">85%</div><div style="font-size:.7rem;color:var(--text-3)">Fertiggestellt</div></div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-title">Projektfortschritt</div>
+            <div class="timeline-list">
+              <div class="tl-item"><div class="tl-dot tl-done">✓</div><div class="tl-body"><div class="tl-title">Beratung & Planung</div><div class="tl-desc">Vor-Ort-Besichtigung, Angebot erstellt und unterschrieben</div><div class="tl-date">Abgeschlossen: 10.04.2025</div></div></div>
+              <div class="tl-item"><div class="tl-dot tl-done">✓</div><div class="tl-body"><div class="tl-title">Abbrucharbeiten & Vorbereitung</div><div class="tl-desc">Alte Bodenbeläge entfernt, Wände vorbereitet</div><div class="tl-date">Abgeschlossen: 22.04.2025</div></div></div>
+              <div class="tl-item"><div class="tl-dot tl-done">✓</div><div class="tl-body"><div class="tl-title">Trockenbau & Böden</div><div class="tl-desc">Neue Ständerwände, Parkett im Wohnzimmer verlegt</div><div class="tl-date">Abgeschlossen: 12.05.2025</div></div></div>
+              <div class="tl-item"><div class="tl-dot tl-current">→</div><div class="tl-body"><div class="tl-title" style="color:var(--gold)">Malerarbeiten</div><div class="tl-desc" style="color:var(--text-2)">Alle Wände & Decken – startet Mittwoch 04.06.</div><div class="tl-date" style="color:var(--gold)">In Arbeit · Team: Stefan H.</div></div></div>
+              <div class="tl-item"><div class="tl-dot tl-pending">5</div><div class="tl-body"><div class="tl-title" style="color:var(--text-3)">Abnahme & Übergabe</div><div class="tl-desc" style="color:var(--text-3)">Gemeinsame Abnahme mit Protokoll</div><div class="tl-date" style="color:var(--text-3)">Geplant: 13.06.2025</div></div></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="card-title">Direktnachricht ans Büro</div>
+              <div style="background:var(--dark-3);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:8px;font-size:.8rem;color:var(--text-2);font-style:italic">"Malerarbeiten starten Mittwoch 04.06. um 8:00 Uhr. Möbel bitte in Raummitte stellen."<div style="font-size:.65rem;color:var(--text-3);margin-top:4px">– Renovera Büro · Heute 14:30</div></div>
+              <textarea class="chat-input" style="width:100%;margin-bottom:8px" rows="2" placeholder="Ihre Frage oder Nachricht..."></textarea>
+              <button class="btn btn-gold" style="width:100%">Nachricht senden</button>
+            </div>
+            <div class="card">
+              <div class="card-title">Projektdokumente</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--dark-3);border-radius:var(--r-sm);cursor:pointer;font-size:.78rem;color:var(--text)">📄 Auftragsvertrag REN-2025-047.pdf<div style="margin-left:auto;color:var(--gold);font-size:.7rem">↓</div></div>
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--dark-3);border-radius:var(--r-sm);cursor:pointer;font-size:.78rem;color:var(--text)">📄 Angebot & Leistungsverzeichnis.pdf<div style="margin-left:auto;color:var(--gold);font-size:.7rem">↓</div></div>
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--dark-3);border-radius:var(--r-sm);cursor:pointer;font-size:.78rem;color:var(--text)">📸 Fortschrittsfotos (12 Bilder)<div style="margin-left:auto;color:var(--gold);font-size:.7rem">↓</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── EMPLOYEE VIEW ── -->
+      <div class="panel" id="panel-mitarbeiter">
+        <div class="emp-today">
+          <div><div class="emp-greeting">Guten Morgen, Stefan! 👋<small>Montag, 02. Juni 2025 · 2 Aufgaben heute</small></div></div>
+          <div class="clock" id="clock">08:42</div>
+        </div>
+        <div class="g2">
+          <div>
+            <div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:10px">Meine Aufgaben heute</div>
+            <div class="emp-task">
+              <div class="emp-task-title">Malerarbeiten Etage 2 vorbereiten</div>
+              <div class="emp-task-loc">📍 MFH Elberfeld · Wohnung 4–6</div>
+              <div class="emp-task-status"><div class="tag tag-gold">In Arbeit</div><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm">Foto hochladen</button><button class="btn btn-gold btn-sm">Erledigt ✓</button></div></div>
+            </div>
+            <div class="emp-task" style="border-left-color:var(--blue)">
+              <div class="emp-task-title">Abschlussreinigung Parkett Solingen</div>
+              <div class="emp-task-loc">📍 Solingen Innenstadt · Alle Räume</div>
+              <div class="emp-task-status"><div class="tag tag-blue">Offen</div><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm">Foto hochladen</button><button class="btn btn-gold btn-sm">Starten →</button></div></div>
+            </div>
+            <div style="margin-top:14px;font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:8px">Nachrichten vom Büro</div>
+            <div style="background:var(--dark-2);border:1px solid rgba(200,164,92,.15);border-radius:var(--r);padding:12px">
+              <div style="font-size:.78rem;color:var(--text-2);background:var(--dark-3);border-radius:var(--r-sm);padding:8px 10px;margin-bottom:6px">"Stefan, bitte Fotos von Etage 2 heute Mittag schicken für den Kunden." <div style="font-size:.65rem;color:var(--text-3);margin-top:3px">Karim · 08:15</div></div>
+              <div style="display:flex;gap:6px"><textarea class="chat-input" style="flex:1" rows="1" placeholder="Antworten..."></textarea><button class="send-btn">→</button></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:10px">Fotos hochladen</div>
+            <div class="photo-upload">
+              <div class="photo-upload-icon">📷</div>
+              <div class="photo-upload-text">Fotos von der Baustelle hochladen</div>
+              <div class="photo-upload-sub">JPG, PNG · Max 20MB · Automatisch dem Projekt zugeordnet</div>
+            </div>
+            <div style="font-size:.75rem;color:var(--text-3);margin:10px 0 6px">Heute hochgeladen (3)</div>
+            <div class="photo-grid">
+              <div class="photo-thumb">🖼️</div>
+              <div class="photo-thumb">🖼️</div>
+              <div class="photo-thumb">🖼️</div>
+              <div class="photo-thumb" style="border:1px dashed rgba(200,164,92,.3);cursor:pointer;color:var(--gold)">+</div>
+            </div>
+            <div style="margin-top:14px;font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:8px">Zeiterfassung</div>
+            <div style="background:var(--dark-2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:.82rem;color:var(--text)">Heute: <span style="color:var(--gold);font-weight:600">5h 42min</span></div><div class="tag tag-green">● Aktiv seit 08:00</div></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" style="flex:1">⏸ Pause</button>
+                <button class="btn" style="flex:1;background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.2)">⏹ Feierabend</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PANEL NAVIGATION ──
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {
+    dashboard:'Dashboard – Büro', chat:'Nachrichten', tasks:'Aufgaben-Board',
+    projekte:'Alle Projekte', notifs:'Benachrichtigungen',
+    kunde:'Kundenportal – Sandra K.', mitarbeiter:'Mein Arbeitsbereich – Stefan H.'
+  };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
+}
+
+// ── ROLE SWITCHER ──
+function switchRole(role, btn) {
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const avatars = {kunde:'SK', buero:'KY', mitarbeiter:'SH'};
+  const colors = {kunde:'#3b82f6', buero:'#c8a45c', mitarbeiter:'#4ade80'};
+  const av = document.getElementById('userAvatar');
+  av.textContent = avatars[role];
+  av.style.background = colors[role] + '33';
+  av.style.color = colors[role];
+  if (role === 'kunde') {
+    showPanel('kunde', null);
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  } else if (role === 'mitarbeiter') {
+    showPanel('mitarbeiter', null);
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  } else {
+    showPanel('dashboard', document.querySelector('.nav-item'));
+    document.querySelector('.nav-item').classList.add('active');
+  }
+}
+
+// ── CHAT OPEN ──
+function openChat(name, initials, color, sub, online) {
+  const colors = {blue:'rgba(96,165,250,.15)', green:'rgba(74,222,128,.15)', orange:'rgba(251,146,60,.15)', gold:'rgba(200,164,92,.15)'};
+  const textColors = {blue:'#60a5fa', green:'#4ade80', orange:'#fb923c', gold:'#c8a45c'};
+  document.getElementById('cName').textContent = name;
+  document.getElementById('cSub').textContent = sub + ' · ' + (online ? 'Online' : 'Zuletzt gesehen heute');
+  document.getElementById('cOnline').style.display = online ? 'block' : 'none';
+  const av = document.getElementById('cAvatar');
+  av.textContent = initials;
+  av.style.background = colors[color] || colors.blue;
+  av.style.color = textColors[color] || textColors.blue;
+  document.querySelectorAll('.chat-contact').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// ── SEND MESSAGE ──
+function sendMsg(e) {
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  e.preventDefault();
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg own';
+  const now = new Date();
+  const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+  div.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">${time}</div>`;
+  msgs.appendChild(div);
+  input.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    const replies = [
+      "Alles klar, danke für die Info!",
+      "Verstanden. Wir kümmern uns darum.",
+      "Gut, ich schaue es mir an.",
+      "Danke, bis dann! 👍",
+      "Super, das klingt gut!"
+    ];
+    const reply = document.createElement('div');
+    reply.className = 'msg other';
+    const t2 = new Date();
+    const t2s = t2.getHours() + ':' + String(t2.getMinutes()).padStart(2,'0');
+    reply.innerHTML = `<div class="msg-bubble">${replies[Math.floor(Math.random()*replies.length)]}</div><div class="msg-time">${t2s}</div>`;
+    msgs.appendChild(reply);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200);
+}
+
+// ── CLOCK ──
+function updateClock() {
+  const now = new Date();
+  const el = document.getElementById('clock');
+  if (el) el.textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+updateClock();
+setInterval(updateClock, 10000);
+</script>
+</body>
+</html>

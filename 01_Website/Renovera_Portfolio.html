@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renovera GmbH – Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c8a45c;--gold-l:#e8c87a;--gold-d:#9a7a38;
+  --dark:#080808;--dark-2:#111111;--dark-3:#1a1a1a;
+  --text:#f0ece4;--muted:#8a8070;
+  --serif:'Cormorant Garamond',serif;
+  --sans:'Montserrat',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--text);font-family:var(--sans);font-weight:300;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--dark-2)}::-webkit-scrollbar-thumb{background:var(--gold-d)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;width:100%;z-index:100;background:rgba(8,8,8,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,164,92,.1);padding:1rem 3rem;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--gold);text-decoration:none}
+.nav-logo span{color:var(--muted);font-weight:300}
+.nav-right{display:flex;gap:1.5rem;align-items:center}
+.nav-link{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s}
+.nav-link:hover{color:var(--gold)}
+
+/* HERO */
+.hero{min-height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(200,164,92,.06) 0%,transparent 70%)}
+.hero-tag{font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:.7rem;justify-content:center}
+.hero-tag::before,.hero-tag::after{content:'';width:30px;height:1px;background:var(--gold)}
+.hero-h1{font-family:var(--serif);font-size:clamp(2.8rem,6vw,5rem);font-weight:300;line-height:1.08;margin-bottom:1rem}
+.hero-h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{font-size:.82rem;color:var(--muted);max-width:500px;line-height:1.85;margin-bottom:2.5rem}
+.hero-stats{display:flex;gap:3rem;justify-content:center;flex-wrap:wrap}
+.h-stat{text-align:center}
+.h-stat-num{font-family:var(--serif);font-size:2.2rem;font-weight:300;color:var(--gold);display:block;line-height:1}
+.h-stat-label{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;display:block}
+
+/* FILTER */
+.filter-bar{padding:2rem 3rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;border-bottom:1px solid rgba(200,164,92,.08)}
+.filter-label{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-right:.5rem}
+.filter-btn{background:transparent;border:1px solid rgba(200,164,92,.15);color:var(--muted);padding:.4rem 1.1rem;font-family:var(--sans);font-size:.65rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .25s;border-radius:2px}
+.filter-btn:hover{border-color:var(--gold);color:var(--gold)}
+.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--dark)}
+
+/* GRID */
+.portfolio-grid{padding:3rem;display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+
+/* PROJECT CARD */
+.proj-card{position:relative;overflow:hidden;cursor:pointer;background:var(--dark-2)}
+.proj-card.hidden{display:none}
+.proj-card:nth-child(1){grid-column:span 2;grid-row:span 2}
+.proj-card:nth-child(6){grid-column:span 2}
+
+.proj-img{width:100%;height:100%;min-height:280px;object-fit:cover;display:block;filter:brightness(.7) saturate(.75);transition:transform .7s ease,filter .5s}
+.proj-card:nth-child(1) .proj-img{min-height:560px}
+.proj-card:nth-child(6) .proj-img{min-height:280px}
+
+.proj-card:hover .proj-img{transform:scale(1.05);filter:brightness(.85) saturate(1)}
+
+.proj-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,8,.95) 0%,rgba(8,8,8,.4) 40%,transparent 70%);opacity:0;transition:opacity .4s;display:flex;flex-direction:column;justify-content:flex-end;padding:1.8rem}
+.proj-card:hover .proj-overlay{opacity:1}
+
+/* always visible bottom info */
+.proj-bottom{position:absolute;bottom:0;left:0;right:0;padding:1.2rem 1.5rem;background:linear-gradient(to top,rgba(8,8,8,.9) 0%,transparent 100%)}
+.proj-cat{font-size:.55rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:.3rem}
+.proj-name{font-family:var(--serif);font-size:1.1rem;font-weight:400;color:var(--text);line-height:1.25}
+.proj-card:nth-child(1) .proj-name{font-size:1.5rem}
+.proj-location{font-size:.62rem;color:rgba(240,236,228,.5);margin-top:.2rem}
+
+/* hover details */
+.proj-details{opacity:0;transform:translateY(10px);transition:all .35s .05s}
+.proj-card:hover .proj-details{opacity:1;transform:translateY(0)}
+.proj-detail-row{display:flex;gap:1.5rem;margin-top:.8rem;flex-wrap:wrap}
+.proj-detail-item{display:flex;flex-direction:column;gap:.15rem}
+.proj-detail-label{font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.proj-detail-val{font-size:.75rem;font-weight:500;color:var(--text)}
+.proj-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.8rem}
+.proj-tag{font-size:.55rem;padding:.2rem .6rem;border:1px solid rgba(200,164,92,.25);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.proj-expand{display:inline-flex;align-items:center;gap:.4rem;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:1rem;cursor:pointer}
+.proj-expand::after{content:'→'}
+
+/* NUMBER BADGE */
+.proj-num{position:absolute;top:1rem;left:1rem;width:32px;height:32px;border-radius:50%;background:rgba(200,164,92,.15);border:1px solid rgba(200,164,92,.3);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:.75rem;color:var(--gold);z-index:2}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.9);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:2rem}
+.modal.open{display:flex}
+.modal-box{background:var(--dark-2);border:1px solid rgba(200,164,92,.12);max-width:900px;width:100%;max-height:90vh;overflow-y:auto;position:relative}
+.modal-box::-webkit-scrollbar{width:3px}
+.modal-box::-webkit-scrollbar-thumb{background:var(--gold-d)}
+.modal-close{position:sticky;top:0;left:0;right:0;padding:1rem 1.5rem;background:var(--dark-2);border-bottom:1px solid rgba(200,164,92,.1);display:flex;justify-content:space-between;align-items:center;z-index:2}
+.modal-close-btn{background:transparent;border:1px solid rgba(200,164,92,.2);color:var(--gold);width:32px;height:32px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+.modal-close-btn:hover{background:rgba(200,164,92,.1)}
+.modal-title-area{}
+.modal-cat{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.modal-title{font-family:var(--serif);font-size:1.5rem;font-weight:300;color:var(--text)}
+.modal-body{padding:1.5rem}
+.modal-images{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:1.5rem}
+.modal-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;filter:brightness(.8)}
+.modal-img:first-child{grid-column:span 2;aspect-ratio:16/7}
+.modal-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.info-box{background:var(--dark-3);padding:1rem;border-left:2px solid var(--gold)}
+.info-label{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.info-val{font-size:.92rem;font-weight:500;color:var(--text);line-height:1.3}
+.modal-desc{font-size:.8rem;color:var(--muted);line-height:1.9;margin-bottom:1.5rem}
+.modal-leistungen{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.leistung-tag{font-size:.6rem;padding:.3rem .8rem;border:1px solid rgba(200,164,92,.2);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.modal-rating{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:var(--dark-3);border:1px solid rgba(200,164,92,.1)}
+.rating-stars{font-size:1rem;color:var(--gold);letter-spacing:.05em}
+.rating-text{font-family:var(--serif);font-size:.9rem;font-style:italic;color:var(--text);flex:1;line-height:1.6}
+.rating-author{font-size:.62rem;color:var(--muted)}
+.modal-cta{background:var(--gold);color:var(--dark);border:none;padding:.9rem 2rem;font-family:var(--sans);font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;display:block;width:100%;margin-top:1rem;transition:background .3s}
+.modal-cta:hover{background:var(--gold-l)}
+
+/* BOTTOM CTA */
+.bottom-cta{padding:6rem 3rem;text-align:center;background:var(--dark-2);border-top:1px solid rgba(200,164,92,.08)}
+.bottom-cta h2{font-family:var(--serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;margin-bottom:1rem}
+.bottom-cta h2 em{font-style:italic;color:var(--gold)}
+.bottom-cta p{font-size:.82rem;color:var(--muted);max-width:480px;margin:0 auto 2rem;line-height:1.85}
+.btn-gold{background:var(--gold);color:var(--dark);padding:.9rem 2.4rem;font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;transition:background .3s,transform .2s;display:inline-block;text-decoration:none}
+.btn-gold:hover{background:var(--gold-l);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--text);padding:.9rem 2.2rem;font-size:.72rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;border:1px solid rgba(240,236,228,.15);transition:border-color .3s,color .3s;display:inline-block;margin-left:1rem}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* FOOTER */
+footer{padding:2rem 3rem;border-top:1px solid rgba(200,164,92,.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.foot-logo{font-family:var(--serif);font-size:1rem;color:var(--gold);font-weight:600}
+.foot-logo span{color:var(--muted);font-weight:300}
+footer p{font-size:.65rem;color:var(--muted)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:1024px){
+  nav{padding:1rem 1.5rem}
+  .portfolio-grid{grid-template-columns:1fr 1fr;padding:1.5rem}
+  .proj-card:nth-child(1){grid-column:span 2;grid-row:span 1}
+  .proj-card:nth-child(1) .proj-img{min-height:320px}
+  .proj-card:nth-child(6){grid-column:span 2}
+  .filter-bar{padding:1.5rem}
+  .hero{padding:7rem 1.5rem 3rem}
+}
+@media(max-width:600px){
+  .portfolio-grid{grid-template-columns:1fr}
+  .proj-card:nth-child(1),.proj-card:nth-child(6){grid-column:span 1}
+  .modal-images{grid-template-columns:1fr}
+  .modal-img:first-child{grid-column:span 1}
+  .modal-info{grid-template-columns:1fr 1fr}
+  .hero-stats{gap:1.5rem}
+  footer{padding:1.5rem}
+  .bottom-cta{padding:4rem 1.5rem}
+  .filter-bar{padding:1rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Renovera<span> GmbH</span></a>
+  <div class="nav-right">
+    <a href="#" class="nav-link">Projekte</a>
+    <a href="#" class="nav-link">Leistungen</a>
+    <a href="#" class="nav-link" style="background:var(--gold);color:var(--dark);padding:.4rem 1rem;font-weight:500">Anfragen</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Unsere Arbeit</div>
+  <h1 class="hero-h1">10 abgeschlossene<br><em>Meisterprojekte</em></h1>
+  <p class="hero-sub">Jedes Projekt ein Versprechen – jedes Ergebnis ein Beweis. Entdecken Sie ausgewählte Referenzen aus Wuppertal und der Region.</p>
+  <div class="hero-stats">
+    <div class="h-stat"><span class="h-stat-num">320+</span><span class="h-stat-label">Projekte gesamt</span></div>
+    <div class="h-stat"><span class="h-stat-num">4,9★</span><span class="h-stat-label">Google-Bewertung</span></div>
+    <div class="h-stat"><span class="h-stat-num">5 J.</span><span class="h-stat-label">Gewährleistung</span></div>
+    <div class="h-stat"><span class="h-stat-num">100%</span><span class="h-stat-label">Festpreis</span></div>
+  </div>
+</div>
+
+<!-- FILTER -->
+<div class="filter-bar reveal">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" onclick="filter('alle',this)">Alle</button>
+  <button class="filter-btn" onclick="filter('sanierung',this)">Komplettsanierung</button>
+  <button class="filter-btn" onclick="filter('bad',this)">Badsanierung</button>
+  <button class="filter-btn" onclick="filter('maler',this)">Malerarbeiten</button>
+  <button class="filter-btn" onclick="filter('boden',this)">Bodenbeläge</button>
+  <button class="filter-btn" onclick="filter('gewerbe',this)">Gewerbe</button>
+</div>
+
+<!-- PORTFOLIO GRID -->
+<div class="portfolio-grid" id="grid">
+
+  <!-- 1 -->
+  <div class="proj-card reveal" data-cat="sanierung" onclick="openModal(0)">
+    <div class="proj-num">01</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1200&q=85" alt="MFH Elberfeld">
+    <div class="proj-bottom">
+      <div class="proj-cat">Komplettsanierung</div>
+      <div class="proj-name">Mehrfamilienhaus Elberfeld<br>12 Wohneinheiten</div>
+      <div class="proj-location">📍 Wuppertal-Elberfeld · 2024</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">1.080 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">14 Wochen</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">380.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Trockenbau</span><span class="proj-tag">Böden</span><span class="proj-tag">Maler</span><span class="proj-tag">Bäder</span><span class="proj-tag">Elektro</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="proj-card reveal" data-cat="bad" onclick="openModal(1)">
+    <div class="proj-num">02</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=700&q=85" alt="Luxus Badsanierung">
+    <div class="proj-bottom">
+      <div class="proj-cat">Badsanierung</div>
+      <div class="proj-name">Luxusbad Ronsdorf</div>
+      <div class="proj-location">📍 Wuppertal-Ronsdorf · 2025</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">14 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">10 Tage</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">22.500 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Fliesen</span><span class="proj-tag">Sanitär</span><span class="proj-tag">FBH</span><span class="proj-tag">LED</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="proj-card reveal" data-cat="gewerbe" onclick="openModal(2)">
+    <div class="proj-num">03</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=700&q=85" alt="Bürogebäude">
+    <div class="proj-bottom">
+      <div class="proj-cat">Gewerbesanierung</div>
+      <div class="proj-name">Bürogebäude Barmen</div>
+      <div class="proj-location">📍 Wuppertal-Barmen · 2025</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">800 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">6 Wochen</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">135.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Trockenbau</span><span class="proj-tag">Böden</span><span class="proj-tag">Elektro</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="proj-card reveal" data-cat="sanierung" onclick="openModal(3)">
+    <div class="proj-num">04</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=85" alt="Wohnung Vohwinkel">
+    <div class="proj-bottom">
+      <div class="proj-cat">Wohnungssanierung</div>
+      <div class="proj-name">Altbauwohnung Vohwinkel</div>
+      <div class="proj-location">📍 Wuppertal-Vohwinkel · 2025</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">120 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">6 Wochen</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">48.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Kernsanierung</span><span class="proj-tag">Maler</span><span class="proj-tag">Böden</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="proj-card reveal" data-cat="boden" onclick="openModal(4)">
+    <div class="proj-num">05</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=700&q=85" alt="Parkett Solingen">
+    <div class="proj-bottom">
+      <div class="proj-cat">Bodenbeläge</div>
+      <div class="proj-name">Parkett-Verlegung Solingen</div>
+      <div class="proj-location">📍 Solingen-Innenstadt · 2024</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">280 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">5 Tage</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">67.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Eiche Parkett</span><span class="proj-tag">Sockelleisten</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 WIDE -->
+  <div class="proj-card reveal" data-cat="sanierung" onclick="openModal(5)">
+    <div class="proj-num">06</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=85" alt="Küche Wohnbereich">
+    <div class="proj-bottom">
+      <div class="proj-cat">Küche & Wohnbereich</div>
+      <div class="proj-name">Offene Wohnküche Cronenberg</div>
+      <div class="proj-location">📍 Wuppertal-Cronenberg · 2024</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">85 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">4 Wochen</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">61.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Küche</span><span class="proj-tag">Böden</span><span class="proj-tag">Maler</span><span class="proj-tag">Elektro</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="proj-card reveal" data-cat="maler" onclick="openModal(6)">
+    <div class="proj-num">07</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=85" alt="Malerarbeiten">
+    <div class="proj-bottom">
+      <div class="proj-cat">Malerarbeiten</div>
+      <div class="proj-name">Komplett-Anstrich Langerfeld</div>
+      <div class="proj-location">📍 Wuppertal-Langerfeld · 2024</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">420 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">8 Tage</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">28.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Q3-Qualität</span><span class="proj-tag">Decken</span><span class="proj-tag">Türen</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="proj-card reveal" data-cat="gewerbe" onclick="openModal(7)">
+    <div class="proj-num">08</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=700&q=85" alt="Praxis Umbau">
+    <div class="proj-bottom">
+      <div class="proj-cat">Praxisumbau</div>
+      <div class="proj-name">Zahnarztpraxis Elberfeld</div>
+      <div class="proj-location">📍 Wuppertal-Elberfeld · 2024</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">180 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">3 Wochen</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">44.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Trockenbau</span><span class="proj-tag">Böden</span><span class="proj-tag">Maler</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="proj-card reveal" data-cat="bad" onclick="openModal(8)">
+    <div class="proj-num">09</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=700&q=85" alt="Badsanierung Remscheid">
+    <div class="proj-bottom">
+      <div class="proj-cat">Badsanierung</div>
+      <div class="proj-name">Familienbad Remscheid</div>
+      <div class="proj-location">📍 Remscheid · 2023</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">9 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">8 Tage</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">14.800 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Fliesen</span><span class="proj-tag">Dusche</span><span class="proj-tag">Sanitär</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="proj-card reveal" data-cat="sanierung" onclick="openModal(9)">
+    <div class="proj-num">10</div>
+    <img class="proj-img" src="https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=700&q=85" alt="Denkmal WGH">
+    <div class="proj-bottom">
+      <div class="proj-cat">Denkmalgerechte Sanierung</div>
+      <div class="proj-name">WGH Barmen – Denkmalschutz</div>
+      <div class="proj-location">📍 Wuppertal-Barmen · 2023</div>
+    </div>
+    <div class="proj-overlay">
+      <div class="proj-details">
+        <div class="proj-detail-row">
+          <div class="proj-detail-item"><div class="proj-detail-label">Fläche</div><div class="proj-detail-val">650 m²</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Dauer</div><div class="proj-detail-val">10 Wochen</div></div>
+          <div class="proj-detail-item"><div class="proj-detail-label">Volumen</div><div class="proj-detail-val">95.000 €</div></div>
+        </div>
+        <div class="proj-tags"><span class="proj-tag">Denkmalschutz</span><span class="proj-tag">Historisch</span><span class="proj-tag">Stuckrenovierung</span></div>
+        <div class="proj-expand">Projekt ansehen</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta reveal">
+  <h2>Ihr Projekt ist das<br><em>nächste Meisterstück</em></h2>
+  <p>Lassen Sie uns gemeinsam etwas Außergewöhnliches schaffen. Kostenlose Beratung, Festpreisangebot in 48 Stunden.</p>
+  <a href="tel:+4920212345" class="btn-gold">Jetzt kostenlos anfragen</a>
+  <a href="#" class="btn-ghost">Alle Leistungen ansehen</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">Renovera<span> GmbH</span></div>
+  <p>© 2025 Renovera GmbH · Wuppertal · Meisterbetrieb HWK · 4,9★ Google</p>
+  <p style="color:var(--gold-d);font-size:.6rem">+49 202 123 456 · info@renovera-wuppertal.de</p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-close">
+      <div class="modal-title-area">
+        <div class="modal-cat" id="mCat"></div>
+        <div class="modal-title" id="mTitle"></div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-images" id="mImages"></div>
+      <div class="modal-info" id="mInfo"></div>
+      <p class="modal-desc" id="mDesc"></p>
+      <div class="modal-leistungen" id="mTags"></div>
+      <div class="modal-rating" id="mRating"></div>
+      <button class="modal-cta" onclick="closeModal()">📞 Ähnliches Projekt anfragen – +49 202 123 456</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const projects = [
+  {
+    cat:"Komplettsanierung",
+    name:"Mehrfamilienhaus Elberfeld – 12 Wohneinheiten",
+    loc:"Wuppertal-Elberfeld",year:"2024",
+    images:["https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=1200&q=85","https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=80","https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80"],
+    info:[{l:"Fläche",v:"1.080 m²"},{l:"Dauer",v:"14 Wochen"},{l:"Volumen",v:"380.000 €"},{l:"Wohneinheiten",v:"12 WE"},{l:"Team",v:"8 Fachkräfte"},{l:"Abnahme",v:"Termingerecht"}],
+    desc:"Ein anspruchsvolles Großprojekt: 12 Wohneinheiten im Mehrfamilienhaus wurden vollständig kernsaniert. Alle Böden wurden erneuert, sämtliche Bäder komplett umgebaut, neue Elektroinstallation verlegt und alle Wände und Decken professionell gemalert. Die Herausforderung: Koordination von 8 Fachkräften gleichzeitig bei laufendem Teilbetrieb. Abgeschlossen zwei Tage vor dem vereinbarten Termin.",
+    tags:["Trockenbau","Böden Parkett","Malerarbeiten Q3","Badsanierung","Elektroinstallation","Türen & Zargen","Abbruch & Entsorgung"],
+    rating:{stars:"★★★★★",text:'"Renovera hat unser gesamtes Haus in einem Zug saniert. Pünktlich, sauber, und der Festpreis wurde eingehalten. Absolut beeindruckend bei dieser Größe."',author:"Eigentümer GmbH, Wuppertal · Google"}
+  },
+  {
+    cat:"Badsanierung",
+    name:"Luxusbad Ronsdorf – Bodenebene Dusche",
+    loc:"Wuppertal-Ronsdorf",year:"2025",
+    images:["https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=1200&q=85","https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=700&q=80","https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=700&q=80"],
+    info:[{l:"Fläche",v:"14 m²"},{l:"Dauer",v:"10 Tage"},{l:"Volumen",v:"22.500 €"},{l:"Fliesen",v:"Großformat 80×80"},{l:"Dusche",v:"Bodeneben"},{l:"Heizung",v:"Fußbodenheizung"}],
+    desc:"Komplette Badsanierung mit höchsten Designansprüchen. Bodenebene Dusche mit Rinnenablauf, großformatige Feinsteinzeug-Fliesen in Betonoptik, elektrische Fußbodenheizung, schwebendes Waschtischunterschrank-System und LED-Spiegelschrank. Die alte Badewanne wurde entfernt und durch eine luxuriöse Regendusche ersetzt. Alles in 10 Werktagen.",
+    tags:["Großformat-Fliesen 80×80","Bodenebene Dusche","Elektrische FBH","Vorwandinstallation","LED-Beleuchtung","Sanitär-Montage"],
+    rating:{stars:"★★★★★",text:'"Unser Bad war ein Albtraum – nach der Sanierung ist es wie ein 5-Sterne-Hotel. Der Festpreis wurde eingehalten. Wir sind absolut begeistert."',author:"Familie Müller, Wuppertal-Ronsdorf · Google"}
+  },
+  {
+    cat:"Gewerbesanierung",
+    name:"Bürogebäude Barmen – 4 Etagen Trockenbau",
+    loc:"Wuppertal-Barmen",year:"2025",
+    images:["https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=85","https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=700&q=80","https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=700&q=80"],
+    info:[{l:"Fläche",v:"800 m²"},{l:"Etagen",v:"4 Stockwerke"},{l:"Dauer",v:"6 Wochen"},{l:"Volumen",v:"135.000 €"},{l:"Mitarbeiter",v:"6 Fachkräfte"},{l:"Betrieb",v:"Laufend"}],
+    desc:"Umfassende Bürorenovierung über 4 Stockwerke bei laufendem Betrieb. Neue Trockenbau-Raumaufteilungen, Akustikdecken, Linoleum-Böden, komplette Neuelektrifizierung und Malerarbeiten in Unternehmensfarben. Besondere Herausforderung: Arbeiten mussten etappenweise um den laufenden Bürobetrieb herum koordiniert werden. Termingerecht nach 6 Wochen abgeschlossen.",
+    tags:["Trockenbau-Raumaufteilung","Akustikdecken","Linoleum-Boden","Elektroinstallation","Malerarbeiten","Kabeltrassen"],
+    rating:{stars:"★★★★★",text:'"Bürokomplex komplett saniert bei laufendem Betrieb – termingerecht, immer erreichbar. Einziger Ansprechpartner für alles. Absolut professionell."',author:"Thomas M., Geschäftsführer · Google"}
+  },
+  {
+    cat:"Wohnungssanierung",
+    name:"Altbauwohnung Vohwinkel – Kernsanierung",
+    loc:"Wuppertal-Vohwinkel",year:"2025",
+    images:["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&q=85","https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80","https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=700&q=80"],
+    info:[{l:"Fläche",v:"120 m²"},{l:"Zimmer",v:"4 Zimmer"},{l:"Dauer",v:"6 Wochen"},{l:"Volumen",v:"48.000 €"},{l:"Baujahr",v:"1963"},{l:"Leerstand",v:"Ja"}],
+    desc:"Vollständige Kernsanierung einer Altbauwohnung aus den 1960ern. Alte Betonböden entfernt und durch Eichenparkett ersetzt, sämtliche Wände neu gespachtelt und gemalert, Elektroinstallation komplett erneuert, Bad und Küche vollständig umgebaut. Die Wohnung wurde aus dem Dornröschenschlaf geweckt und erstrahlt nun in modernem Altbau-Charme.",
+    tags:["Eichenparkett 14mm","Malerarbeiten Q3","Elektro-Kompletterneuerung","Badsanierung","Stuckleisten restauriert","Türen & Zargen neu"],
+    rating:{stars:"★★★★★",text:'"Von der Beratung bis zur Übergabe alles erstklassig. Keine bösen Überraschungen, Festpreis eingehalten. Die Wohnung sieht traumhaft aus."',author:"Laura & Ben S., Wuppertal · Google"}
+  },
+  {
+    cat:"Bodenbeläge",
+    name:"Parkett-Verlegung Solingen – Gewerbefläche",
+    loc:"Solingen-Innenstadt",year:"2024",
+    images:["https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=1200&q=85","https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=700&q=80","https://images.unsplash.com/photo-1484154218962-a197022b5858?w=700&q=80"],
+    info:[{l:"Fläche",v:"280 m²"},{l:"Material",v:"Eiche Natur"},{l:"Dauer",v:"5 Tage"},{l:"Volumen",v:"67.000 €"},{l:"Stärke",v:"14 mm"},{l:"Oberfläche",v:"Geölt"}],
+    desc:"Verlegung von hochwertigem Eichenparkett auf 280 m² Gewerbefläche. Untergrundvorbereitung mit Egalisierungsmasse, Verlegung im Fischgrätmuster, Sockelleisten in Eiche passend, anschließende professionelle Ölung und Versiegelung. Das Ergebnis ist eine warme, repräsentative Gewerbefläche die Kunden beeindruckt.",
+    tags:["Eiche Fischgrät","Egalisierungsmasse","Meisterhafter Schliff","Trittschalldämmung","Sockelleisten","Ölung Osmo"],
+    rating:{stars:"★★★★★",text:'"Perfekte Verlegung, sauberes Arbeiten und das Ergebnis übertrifft alle Erwartungen. Herr Yilmaz hat persönlich die Qualität kontrolliert."',author:"Herr Fischer, Solingen · Google"}
+  },
+  {
+    cat:"Küche & Wohnbereich",
+    name:"Offene Wohnküche Cronenberg",
+    loc:"Wuppertal-Cronenberg",year:"2024",
+    images:["https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=85","https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=700&q=80","https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=700&q=80"],
+    info:[{l:"Fläche",v:"85 m²"},{l:"Zimmer",v:"Küche + Wohnen"},{l:"Dauer",v:"4 Wochen"},{l:"Volumen",v:"61.000 €"},{l:"Wand entfernt",v:"Tragende Wand"},{l:"Einbauten",v:"Maßgefertigt"}],
+    desc:"Zusammenlegung von Küche und Wohnbereich durch Entfernung einer nicht-tragenden Wand. Neue offene Raumgestaltung mit Vinylboden in Betonoptik, maßgefertigte Einbauregal-Wand, neue Kücheninstallation mit Elektro und Sanitär. Deckenbeleuchtung mit dimmbaren LED-Spots und Kücheninsel. Ein völlig neues Raumgefühl.",
+    tags:["Wanddurchbruch","Vinyl Betonoptik","LED-Einbauspots","Kücheninstallation","Maßregal","Malerarbeiten"],
+    rating:{stars:"★★★★★",text:'"Unsere Küche und unser Wohnzimmer wurden komplett neu gestaltet. Das Team hat mitgedacht und tolle Ideen eingebracht. Absolut empfehlenswert."',author:"Familie Richter, Cronenberg · Google"}
+  },
+  {
+    cat:"Malerarbeiten",
+    name:"Komplett-Anstrich MFH Langerfeld",
+    loc:"Wuppertal-Langerfeld",year:"2024",
+    images:["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=85","https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=700&q=80","https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=700&q=80"],
+    info:[{l:"Fläche",v:"420 m²"},{l:"Qualität",v:"Q3-Standard"},{l:"Dauer",v:"8 Tage"},{l:"Volumen",v:"28.000 €"},{l:"Wohnungen",v:"8 WE"},{l:"Farbe",v:"Kundenwahl"}],
+    desc:"Professionelle Malerarbeiten in 8 Wohnungen eines Mehrfamilienhauses nach Mieterwechsel. Wände und Decken komplett gespachtelt (Q3-Qualität), Türen und Zargen lackiert, Heizkörper neu gestrichen. Farbkonzept individuell für jede Wohnung. Alle 8 Einheiten in 8 Werktagen fertiggestellt – rekordverdächtig.",
+    tags:["Q3-Spachtelqualität","Dispersion 2-fach","Türen lackiert","Heizkörper gestrichen","Abkleben & Schutz","8 Wohnungen parallel"],
+    rating:{stars:"★★★★★",text:'"8 Wohnungen in 8 Tagen – ich hätte es nicht für möglich gehalten. Saubere Arbeit, kein Tropfen daneben. So muss das sein."',author:"Hausverwaltung Bergisch, Wuppertal · Google"}
+  },
+  {
+    cat:"Praxisumbau",
+    name:"Zahnarztpraxis Elberfeld – Komplettumbau",
+    loc:"Wuppertal-Elberfeld",year:"2024",
+    images:["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=85","https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=700&q=80","https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80"],
+    info:[{l:"Fläche",v:"180 m²"},{l:"Behandlungszimmer",v:"4 Räume"},{l:"Dauer",v:"3 Wochen"},{l:"Volumen",v:"44.000 €"},{l:"Betrieb danach",v:"Sofort"},{l:"Norm",v:"DIN 13080"}],
+    desc:"Kompletter Umbau einer Zahnarztpraxis nach DIN 13080-Norm. Neue Trockenbau-Raumaufteilung mit Schallschutz, Vinylboden mit Antiseptik-Beschichtung, Einbau von Behandlungszimmer-Schiebetüren, komplette Elektrik neu inklusive Medizintechnik-Anschlüsse. Empfangs- und Wartezimmer in modernem Designkonzept gestaltet.",
+    tags:["Schallschutz-Trockenbau","Medizinischer Vinylboden","Schiebetüren","Elektro Medizintechnik","Barrierefreiheit","DIN 13080 konform"],
+    rating:{stars:"★★★★★",text:'"Meine Praxis wurde genau nach meinen Vorstellungen umgebaut. Renovera hat alles koordiniert und mir keine Minute Stress bereitet. Klasse Team."',author:"Dr. med. Schreiber, Wuppertal · Houzz"}
+  },
+  {
+    cat:"Badsanierung",
+    name:"Familienbad Remscheid – Komplett-Umbau",
+    loc:"Remscheid",year:"2023",
+    images:["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=85","https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=700&q=80","https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=700&q=80"],
+    info:[{l:"Fläche",v:"9 m²"},{l:"Dauer",v:"8 Tage"},{l:"Volumen",v:"14.800 €"},{l:"Dusche",v:"Bodeneben"},{l:"Fliesen",v:"60×120 cm"},{l:"Badewanne",v:"Freistehend"}],
+    desc:"Komplette Badsanierung mit freistehender Badewanne und bodenebener Dusche. Großformatige Fliesen in Marmoroptik, dunkle Akzentfliesen in der Dusche, unsichtbarer Glashalter, moderneArmaturen in Schwarz-Matt. Die alte 70er-Jahre-Kacheln wurden entfernt und durch ein zeitloses elegantes Designbad ersetzt.",
+    tags:["Marmoroptik Fliesen","Bodenebene Dusche","Freistehende Badewanne","Schwarze Armaturen","Glasduschtrennwand","Spiegelschrank LED"],
+    rating:{stars:"★★★★★",text:'"Unser Traumbad wurde Realität. Renovera hat jeden Wunsch umgesetzt und sogar noch bessere Ideen eingebracht. In 8 Tagen fertig!"',author:"Familie Wagner, Remscheid · MyHammer"}
+  },
+  {
+    cat:"Denkmalgerechte Sanierung",
+    name:"Wohn- & Geschäftshaus Barmen – Denkmalschutz",
+    loc:"Wuppertal-Barmen",year:"2023",
+    images:["https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=1200&q=85","https://images.unsplash.com/photo-1484154218962-a197022b5858?w=700&q=80","https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80"],
+    info:[{l:"Fläche",v:"650 m²"},{l:"Baujahr",v:"1898"},{l:"Dauer",v:"10 Wochen"},{l:"Volumen",v:"95.000 €"},{l:"Denkmalschutz",v:"Kategorie B"},{l:"Behörde",v:"Genehmigt"}],
+    desc:"Besonders anspruchsvolles Projekt: Innensanierung eines denkmalgeschützten Wohn- und Geschäftshauses aus dem Jahr 1898. Original-Stuckelemente wurden restauriert und ergänzt, historische Holzböden aufgearbeitet, Wände mit historisch korrekten Kalkputzen verarbeitet. Alle Maßnahmen in enger Abstimmung mit der Unteren Denkmalbehörde Wuppertal genehmigt und ausgeführt.",
+    tags:["Stuckrestauration","Historischer Kalkputz","Holzböden aufgearbeitet","Denkmalgerechte Fenster","Behördlich genehmigt","Kastenfenster restauriert"],
+    rating:{stars:"★★★★★",text:'"Renovera hat bewiesen dass modernes Handwerk und historische Substanz sich nicht ausschließen. Das Ergebnis ist atemberaubend. Danke!"',author:"Eigentümer WGH, Barmen · Google"}
+  }
+];
+
+function openModal(idx){
+  const p=projects[idx];
+  document.getElementById('mCat').textContent=p.cat;
+  document.getElementById('mTitle').textContent=p.name;
+  const imgs=p.images.map((src,i)=>`<img class="modal-img" src="${src}" alt="${p.name}" loading="lazy">`).join('');
+  document.getElementById('mImages').innerHTML=imgs;
+  document.getElementById('mInfo').innerHTML=p.info.map(i=>`<div class="info-box"><div class="info-label">${i.l}</div><div class="info-val">${i.v}</div></div>`).join('');
+  document.getElementById('mDesc').textContent=p.desc;
+  document.getElementById('mTags').innerHTML=p.tags.map(t=>`<span class="leistung-tag">${t}</span>`).join('');
+  document.getElementById('mRating').innerHTML=`<div style="display:flex;flex-direction:column;gap:.3rem"><div class="rating-stars">${p.rating.stars}</div><div class="rating-text">${p.rating.text}</div><div class="rating-author">${p.rating.author}</div></div>`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
+function closeModalOutside(e){if(e.target===document.getElementById('modal'))closeModal();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+function filter(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.proj-card').forEach(c=>{
+    if(cat==='alle'||c.dataset.cat===cat){c.classList.remove('hidden');}
+    else{c.classList.add('hidden');}
+  });
+}
+
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
+},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
+</script>
+</body>
+</html>
